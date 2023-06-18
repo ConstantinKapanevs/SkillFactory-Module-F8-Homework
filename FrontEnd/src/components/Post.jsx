@@ -8,18 +8,42 @@ import {
 } from "../utils/PostService";
 import "../styles/Post.css";
 import dateFormat from "dateformat";
+import axios from "axios";
 
 function Post() {
   const [myData, setMyData] = useState([]);
   const [text, setText] = useState("");
+  const [likes, setLikes] = useState(null);
+  const [dataSize, setDataSize] = useState(null);
   const [renderer, setRenderer] = useState(false);
+
+  const minusLike = async (id) => {
+    const myLike = await removeLike(id);
+    // setLikes(myLike);
+    setRenderer(!renderer);
+  };
+
+  const plusLike = async (id) => {
+    const myLike = await addLike(id);
+    setLikes(myLike);
+  };
+
+  const erasePost = async (id) => {
+    await deletePost(id);
+    setRenderer(!renderer);
+  };
+
+  const newPost = async (content) => {
+    await createPost(content);
+    setRenderer(!renderer);
+  };
 
   useEffect(() => {
     getPosts().then((result) => {
       setMyData(result);
     });
     console.log("rendered...");
-  }, [renderer]);
+  }, [likes, renderer]);
 
   return (
     <>
@@ -34,8 +58,7 @@ function Post() {
                 type="button"
                 value={post.id}
                 onClick={(e) => {
-                  removeLike(e.target.value);
-                  setRenderer(!renderer);
+                  minusLike(e.target.value);
                 }}
               >
                 -
@@ -45,8 +68,7 @@ function Post() {
                 type="button"
                 value={post.id}
                 onClick={(e) => {
-                  setRenderer(!renderer);
-                  addLike(e.target.value);
+                  plusLike(e.target.value);
                 }}
               >
                 +
@@ -55,8 +77,7 @@ function Post() {
                 type="button"
                 value={post.id}
                 onClick={(e) => {
-                  deletePost(e.target.value);
-                  setRenderer(!renderer);
+                  erasePost(e.target.value);
                 }}
               >
                 Delete
@@ -77,8 +98,7 @@ function Post() {
           <button
             type="button"
             onClick={() => {
-              setRenderer(!renderer);
-              createPost(text);
+              newPost(text);
             }}
           >
             Create
